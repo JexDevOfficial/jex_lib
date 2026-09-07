@@ -10,15 +10,13 @@ repository 'https://github.com/JexDevOfficial/jex_lib'
 
 lua54 'yes'
 
--- Every file loaded through init.lua has to be listed here, or the
--- client cannot read it.
+-- Anything loaded through init.lua has to be listed here, or the client
+-- cannot read it.
 files {
     'init.lua',
-    'version.lua',
     'config.lua',
     'core/*.lua',
     'modules/*.lua',
 }
 
-shared_script 'version.lua'
 server_script 'boot.lua'

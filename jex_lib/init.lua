@@ -50,7 +50,6 @@ end
 
 local server = IsDuplicityVersion()
 
-load_file('version.lua')
 load_file('config.lua')
 
 -- Compare against the library, not against ourselves - a bundled copy

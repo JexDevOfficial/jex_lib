@@ -20,11 +20,18 @@ Every Jex script loads this and nothing else. It works out which
 framework your server is built on when it starts, so there is no core to
 set and no SQL to import.
 
+## Install
+
+1. Download `jex_lib.zip` from the [latest release](../../releases/latest)
+2. Unzip it into your `resources` folder
+3. Add it above anything that uses it
+
 ```cfg
 ensure jex_lib
 ```
 
-That is the install.
+That is the install. The zip already contains a folder named `jex_lib`,
+so there is nothing to rename.
 
 ## What it does
 
@@ -217,6 +224,21 @@ taking the resource down. RedEM:RP does not expose its inventory the way
 the others do — money, jobs and identity are solid there, items are the
 least certain part. If you hit something, open an issue with your
 console output.
+
+## Repo layout
+
+```
+jex_lib/            the resource - this is what goes in your server
+  fxmanifest.lua
+  init.lua          the only file a script references
+  config.lua        fallbacks, rarely touched
+  boot.lua          reports what it detected, on start
+  core/             one adapter per framework
+  modules/          db, callbacks, validation, helpers
+```
+
+Everything outside `jex_lib/` is documentation and tooling. Only the
+folder itself ships.
 
 ## Contributing
 
