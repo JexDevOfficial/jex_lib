@@ -22,16 +22,21 @@ set and no SQL to import.
 
 ## Install
 
-1. Download `jex_lib.zip` from the [latest release](../../releases/latest)
+1. Grab **`jex_lib.zip`** from the [latest release](../../releases/latest)
 2. Unzip it into your `resources` folder
 3. Add it above anything that uses it
 
 ```cfg
+ensure oxmysql
 ensure jex_lib
 ```
 
-That is the install. The zip already contains a folder named `jex_lib`,
-so there is nothing to rename.
+That is the install. No core to set, no SQL to import.
+
+> Take `jex_lib.zip` from the release, not the green **Code → Download
+> ZIP** button. That one gives you the whole repository in a folder named
+> after the branch, which you would then have to rename. The release zip
+> is already just the resource.
 
 ## What it does
 
