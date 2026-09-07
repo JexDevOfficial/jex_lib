@@ -27,6 +27,19 @@ local function inventory()
     end
 end
 
+-- Same thing from the server, for anything that wants to notify a
+-- player without writing the event out:
+--
+--   exports.jex_lib:Notify(source, 'Payment received.', 'success')
+exports('Notify', function(src, text, kind, duration, title)
+    if not src then return end
+    TriggerClientEvent('jex:notify', src, text, kind, duration, title)
+end)
+
+exports('NotifyAll', function(text, kind, duration, title)
+    TriggerClientEvent('jex:notify', -1, text, kind, duration, title)
+end)
+
 AddEventHandler('onResourceStart', function(resource)
     if resource ~= GetCurrentResourceName() then return end
 

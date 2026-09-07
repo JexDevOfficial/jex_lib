@@ -10,6 +10,8 @@ repository 'https://github.com/JexDevOfficial/jex_lib'
 
 lua54 'yes'
 
+ui_page 'nui/index.html'
+
 -- Anything loaded through init.lua has to be listed here, or the client
 -- cannot read it.
 files {
@@ -17,6 +19,10 @@ files {
     'config.lua',
     'core/*.lua',
     'modules/*.lua',
+    'nui/index.html',
+    'nui/style.css',
+    'nui/app.js',
 }
 
 server_script 'boot.lua'
+client_script 'client.lua'

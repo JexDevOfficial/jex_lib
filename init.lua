@@ -84,6 +84,7 @@ load_file('core/contract.lua')
 load_file(('core/%s.lua'):format(Jex.core))
 
 load_file('modules/util.lua')
+load_file('modules/notify.lua')
 load_file('modules/callback.lua')
 
 if server then
@@ -95,6 +96,7 @@ else
     load_file('modules/npc.lua')
     load_file('modules/marker.lua')
     load_file('modules/prompt.lua')
+    load_file('modules/interact.lua')
     load_file('modules/point.lua')
 end
 
