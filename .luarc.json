@@ -1,0 +1,16 @@
+{
+    "runtime.version": "Lua 5.4",
+    "diagnostics.globals": [
+        "Jex", "JexConfig", "Config", "JEX_LIB_VERSION",
+        "exports", "GetResourceState", "GetCurrentResourceName",
+        "GetResourceMetadata", "LoadResourceFile", "IsDuplicityVersion",
+        "TriggerEvent", "TriggerServerEvent", "TriggerClientEvent",
+        "RegisterNetEvent", "AddEventHandler", "RemoveEventHandler",
+        "CreateThread", "Wait", "SetTimeout",
+        "RegisterCommand", "source", "vector3", "vec3", "PlayerPedId",
+        "GetEntityCoords", "GetPlayerPed", "GetPlayers", "msgpack",
+        "json", "promise", "Citizen"
+    ],
+    "workspace.library": [],
+    "diagnostics.disable": ["lowercase-global"]
+}

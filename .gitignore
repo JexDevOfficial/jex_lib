@@ -1,0 +1,11 @@
+# Internal working notes. Not for the public repo - PLAN.md carries
+# competitive strategy and unreleased thinking.
+PLAN.md
+EXAMPLE.md
+
+.DS_Store
+Thumbs.db
+*.log
+*.bak
+.vscode/
+.idea/
