@@ -1,6 +1,3 @@
--- What every adapter has to provide, and the shapes callers can rely on.
--- Checked on start in debug, so a half-written adapter is caught here
--- rather than on somebody's server.
 
 Jex.Core = Jex.Core or {}
 
@@ -19,8 +16,6 @@ local CLIENT = {
     'Notify',
 }
 
--- Never return nil where a caller expects a value. A missing player is
--- an empty job, not a crash three files away.
 function Jex.Core.EmptyJob()
     return { name = 'unemployed', label = 'Unemployed', grade = 0,
              gradeLabel = '', onDuty = true, isBoss = false }
@@ -35,7 +30,6 @@ function Jex.Core.EmptyCharInfo()
     return { firstname = '', lastname = '', birthdate = '', gender = 0 }
 end
 
--- One item shape, whatever the inventory calls things internally.
 function Jex.Core.Item(t)
     t = t or {}
     return {

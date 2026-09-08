@@ -1,9 +1,3 @@
--- jex_lib's own client. Notifications have to exist exactly once on a
--- server rather than once per script, so this owns the routing and
--- every script reaches it through the jex:notify event.
---
--- Ours is the fallback, not the point. If the server runs a notification
--- resource it chose, that is what Jex scripts use - same as interaction.
 
 local settings = { style = 'auto', position = 'top-right', max = 4 }
 
@@ -19,9 +13,6 @@ end
 
 local TYPES = { success = true, error = true, warning = true, info = true }
 
--- Checked in this order, and only if the resource is running.
--- jex_notifications first: if somebody installed ours, that is the one
--- they meant to use.
 local ORDER = { 'jex_notifications', 'ox_lib', 'vorp', 'redem' }
 
 local ADAPTERS = {
@@ -72,8 +63,6 @@ local function detect()
     if wanted ~= 'auto' then
         local adapter = ADAPTERS[wanted]
 
-        -- Say so now rather than silently using something else the first
-        -- time a script tries to notify somebody.
         if adapter and GetResourceState(adapter.resource) ~= 'started' then
             Jex.Warn(('Notify is set to "%s" but %s is not running. Using ours.')
                 :format(wanted, adapter.resource))
@@ -118,7 +107,6 @@ end
 RegisterNetEvent('jex:notify', notify)
 AddEventHandler('jex:notify', notify)
 
--- Open to anything on the server, not just Jex scripts.
 exports('Notify', function(text, kind, duration, title)
     notify(text, kind, duration, title)
 end)

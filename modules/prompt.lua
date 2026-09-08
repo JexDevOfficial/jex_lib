@@ -8,7 +8,6 @@ local function varString(text)
     return CreateVarString(10, 'LITERAL_STRING', text)
 end
 
--- Common RedM control hashes, so a script says 'e' rather than a number.
 Prompt.Keys = {
     e = 0x760A9C6F,
     g = 0x760A9C6F,
@@ -72,7 +71,6 @@ function Prompt.SetLabel(handle, label)
     PromptSetText(handle, varString(label))
 end
 
--- Call every frame the group should be on screen.
 function Prompt.SetGroup(group)
     local g = groups[group]
     Citizen.InvokeNative(0xC65A45D4453C2627, group, varString(g and g.label or ''), 1)
@@ -98,14 +96,8 @@ function Prompt.RemoveAll()
 end
 
 --------------------------------------------------------------------------
--- Builder
---
--- Takes a list of options and gives back something with Show() and
--- Pressed(). Handles the group, the keys and the hold timers, so a
--- script never touches a prompt handle.
 --------------------------------------------------------------------------
 
--- Assigned in order when an option does not name its own key.
 local ORDER = { 0x760A9C6F, 0xC7B5340A, 0xF84FA74F, 0xD9D0E1C0, 0x156F7119, 0x6D1319BE }
 
 function Prompt.Build(opts)
@@ -126,9 +118,6 @@ function Prompt.Build(opts)
 
     local builder = { group = group, entries = entries }
 
-    -- Call every frame the prompts should be on screen. Options that
-    -- cannot be used right now are greyed out rather than removed, so
-    -- the list does not jump about as conditions change.
     function builder.Show()
         for _, entry in ipairs(entries) do
             local usable = not entry.option.canInteract or entry.option.canInteract()
@@ -139,7 +128,6 @@ function Prompt.Build(opts)
         Prompt.SetGroup(group)
     end
 
-    -- Returns the option that was just triggered, or nil.
     function builder.Pressed()
         for _, entry in ipairs(entries) do
             local done = entry.option.hold

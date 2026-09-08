@@ -1,11 +1,3 @@
--- One way for a script to say "there is something here", and one config
--- setting that decides how it appears.
---
--- Whatever interaction resource the server already runs gets used, so a
--- Jex point behaves like everything else on that server. With none
--- installed it falls back to the game's own prompts, which need no
--- setup and look like the rest of RDR2.
-
 Jex.Interact = {}
 local Interact = Jex.Interact
 
@@ -20,10 +12,7 @@ local mode
 
 local REACH = setting('InteractDistance', 2.5)
 
--- Checked in this order, and only if the resource is actually running.
--- jex_interact comes first: if somebody bought ours, that is the one
--- they meant to use.
-local ORDER = { 'jex_interact', 'ox_target', 'polly', 'murphy' }
+local ORDER = { 'jex_interact', 'ox_target', 'pc', 'murphy' }
 
 local ADAPTERS = {
     jex_interact = {
@@ -62,26 +51,42 @@ local ADAPTERS = {
         end,
     },
 
-    polly = {
-        resource = 'polly_interact',
+    pc = {
+        resource = 'pc_interaction',
         add = function(point)
-            exports.polly_interact:AddInteraction {
-                coords = point.coords,
-                distance = point.radius or REACH,
-                name = point.id,
-                options = point.options,
-            }
+            local options = {}
+
+            for _, opt in ipairs(point.options) do
+                options[#options + 1] = {
+                    text = opt.label,
+                    canUse = opt.canInteract,
+                    onSelect = opt.onSelect,
+                }
+            end
+
+            exports.pc_interaction:GetApi().CreateInteraction(
+                point.id, point.coords, options,
+                (point.radius or REACH) * 3, point.radius or REACH)
         end,
     },
 
     murphy = {
         resource = 'murphy_interact',
         add = function(point)
+            local options = {}
+
+            for _, opt in ipairs(point.options) do
+                options[#options + 1] = {
+                    label = opt.label,
+                    action = opt.onSelect,
+                }
+            end
+
             exports.murphy_interact:AddInteraction {
-                coords = point.coords,
-                distance = point.radius or REACH,
                 id = point.id,
-                options = point.options,
+                coords = point.coords,
+                options = options,
+                interactDst = point.radius or REACH,
             }
         end,
     },
@@ -93,8 +98,6 @@ local function detect()
     if wanted ~= 'auto' then
         local adapter = ADAPTERS[wanted]
 
-        -- Say so now rather than silently using prompts the first time
-        -- somebody walks up to a point.
         if adapter and GetResourceState(adapter.resource) ~= 'started' then
             Jex.Warn(('Interaction is set to "%s" but %s is not running. Using prompts.')
                 :format(wanted, adapter.resource))
@@ -111,11 +114,13 @@ local function detect()
     return 'prompt'
 end
 
--- Anything a script registers before the config has been read is queued
--- rather than lost.
 local pending = {}
 local ready = false
 
+--- Registers a place a player can interact with. How it appears is the
+--- server owner's choice, not the script's.
+---@param point table (`id`, `coords`, `radius`, `label`, `options`)
+---@return string (The id, generated if you did not give one)
 function Interact.Register(point)
     point.coords = Jex.Util.Coords(point.coords)
     point.options = point.options or {}
@@ -129,8 +134,10 @@ function Interact.Register(point)
     end
 
     local adapter = ADAPTERS[mode]
+
     if adapter then
         local ok, err = pcall(adapter.add, point)
+
         if not ok then
             Jex.Warn(('%s refused a point, falling back to prompts: %s'):format(mode, err))
             mode = 'prompt'
@@ -140,10 +147,15 @@ function Interact.Register(point)
     return point.id
 end
 
+--- Registers several at once.
+---@param list table (An array of points)
 function Interact.RegisterMany(list)
     for _, point in ipairs(list or {}) do Interact.Register(point) end
 end
 
+--- Removes one interaction.
+---@param id string (What Register returned)
+---@return boolean (`true` if it was there)
 function Interact.Remove(id)
     for i, point in ipairs(points) do
         if point.id == id then
@@ -152,16 +164,22 @@ function Interact.Remove(id)
             return true
         end
     end
+
     return false
 end
 
+--- Removes everything this resource registered. Happens on its own when the
+--- resource stops.
 function Interact.RemoveAll()
     for _, point in ipairs(points) do
         if point.prompts then point.prompts.Remove() end
     end
+
     points = {}
 end
 
+--- Which interaction system was detected.
+---@return string ('jex_interact', 'ox_target', 'pc', 'murphy' or 'prompt')
 function Interact.Mode()
     return mode
 end
@@ -177,10 +195,10 @@ CreateThread(function()
     for _, point in ipairs(pending) do
         if ADAPTERS[mode] then pcall(ADAPTERS[mode].add, point) end
     end
+
     pending = {}
 end)
 
--- Native prompts. Only runs when nothing else claimed the points.
 CreateThread(function()
     while true do
         local wait = 400
@@ -191,9 +209,6 @@ CreateThread(function()
             for _, point in ipairs(points) do
                 local near = #(pos - point.coords) <= (point.radius or REACH)
 
-                -- Built the first time somebody gets close, not on load.
-                -- Fifty offices would otherwise register fifty prompt
-                -- groups at startup, most of which are never seen.
                 if near and not point.prompts then
                     point.prompts = Jex.Prompt.Build {
                         label = point.label,
@@ -206,6 +221,7 @@ CreateThread(function()
                     point.prompts.Show()
 
                     local chosen = point.prompts.Pressed()
+
                     if chosen and chosen.onSelect then
                         chosen.onSelect(point)
                         Wait(250)

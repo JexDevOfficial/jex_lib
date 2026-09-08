@@ -1,15 +1,9 @@
--- Server-side checks. The client sends intent; this decides.
--- Every one of these returns false rather than throwing, so a refused
--- action is a quiet no, not a stack trace in somebody's console.
 
 Jex.Guard = {}
 local Guard = Jex.Guard
 
 local buckets = {}
 
--- How far a player can be from a point and still be considered at it.
--- Generous on purpose: positions lag, and a false refusal is worse than
--- a metre of slack.
 local REACH = 4.0
 
 function Guard.Loaded(src)
@@ -35,8 +29,6 @@ function Guard.HasItem(src, item, amount)
     return Jex.Core.HasItem(src, item, amount or 1)
 end
 
--- Owning a record is a question only the script can answer, so it hands
--- us the lookup and we do the comparing.
 function Guard.Owns(src, lookup)
     local id = Jex.Core.GetIdentifier(src)
     if not id then return false end
@@ -70,7 +62,6 @@ function Guard.OneOf(value, allowed)
     return nil
 end
 
--- Per player, per action. Stops an injected event being fired in a loop.
 function Guard.Rate(src, action, perMinute)
     local key = ('%s:%s'):format(src, action)
     local now = GetGameTimer()
@@ -97,8 +88,6 @@ AddEventHandler('playerDropped', function()
     end
 end)
 
--- The usual set, in one call. Returns false and notifies on the first
--- failure, so a handler reads as: if not Jex.Guard.Check(...) then return end
 function Guard.Check(src, opts)
     opts = opts or {}
 

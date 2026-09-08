@@ -110,7 +110,6 @@ if server then
         return ok and true or false
     end
 
-    -- RSG takes no metadata when removing; it matches on slot instead.
     function Core.RemoveItem(src, item, amount, meta, slot)
         local ok = exports['rsg-inventory']:RemoveItem(src, item, amount or 1, slot, Jex.resource)
         return ok and true or false
@@ -157,7 +156,6 @@ if server then
 
 else
 
-    -- GetPlayerData returns directly when called without a callback.
     function Core.IsLoaded()
         local d = RSG.Functions.GetPlayerData()
         return d ~= nil and d.citizenid ~= nil
@@ -231,9 +229,6 @@ else
         return Core.GetItemCount(item) >= (amount or 1)
     end
 
-    -- RSG has no notify of its own; rsg-core uses ox_lib for this. Ours
-    -- is handled by jex_lib so we are not relying on somebody else's
-    -- resource being installed.
     function Core.Notify(msg, kind, duration)
         TriggerEvent('jex:notify', msg, kind, duration)
     end

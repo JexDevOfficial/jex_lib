@@ -25,8 +25,6 @@ function Marker.Draw(coords, opts)
         false, false, 2, false, nil, nil, false)
 end
 
--- Draws while the player is close and stops when they leave. Sleeps
--- when nobody is near, so an idle marker costs nothing.
 function Marker.Loop(coords, opts)
     opts = opts or {}
     local c = Jex.Util.Coords(coords)

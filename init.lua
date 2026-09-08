@@ -1,9 +1,3 @@
--- Loaded by every Jex script:
---
---   shared_scripts { '@jex_lib/init.lua' }
---
--- Everything then lives on the Jex global. Each script gets its own
--- copy in its own Lua state, so Jex holds behaviour, never shared state.
 
 local LIB = 'jex_lib'
 local script = GetCurrentResourceName()
@@ -52,8 +46,6 @@ local server = IsDuplicityVersion()
 
 load_file('config.lua')
 
--- Compare against the library, not against ourselves - a bundled copy
--- can be older than the one actually installed.
 function Jex.Require(min)
     local function parts(v)
         local t = {}
@@ -79,8 +71,6 @@ end
 load_file('core/detect.lua')
 load_file('core/contract.lua')
 
--- Only the detected adapter is loaded. A VORP server never parses RSG
--- code, so a core that is not installed cannot throw on load.
 load_file(('core/%s.lua'):format(Jex.core))
 
 load_file('modules/util.lua')

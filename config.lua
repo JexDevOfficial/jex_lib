@@ -12,7 +12,7 @@ JexConfig = {
     --   prompt        native RDR2 prompts
     --   jex_interact  jex_interact
     --   ox_target     ox_target
-    --   polly         polly_interact
+    --   pc            pc_interaction
     --   murphy        murphy_interact
     Interaction = 'auto',
 

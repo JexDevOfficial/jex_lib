@@ -1,11 +1,7 @@
--- Written against vorp_core and vorp_inventory source. Not yet run on a
--- live VORP server - anything that could differ is wrapped so it fails
--- soft rather than taking the resource down.
 
 local Core = Jex.Core
 local VORP = exports.vorp_core:GetCore()
 
--- VORP numbers its currencies instead of naming them.
 local CURRENCY = { cash = 0, bank = 0, gold = 1, rol = 2 }
 
 local server = IsDuplicityVersion()
@@ -15,9 +11,6 @@ local function char(src)
     return user and user.getUsedCharacter or nil
 end
 
--- Nothing here has been run against a live VORP server, so every call
--- into it goes through this. A wrong guess degrades instead of taking
--- the resource down on somebody else's server.
 local function try(fn, fallback)
     local ok, result = pcall(fn)
     if ok then return result end
@@ -53,7 +46,6 @@ if server then
         }
     end
 
-    -- VORP has no gangs. Jobs carry a grade and a label and nothing else.
     function Core.GetJob(src)
         local c = char(src)
         if not c then return Core.EmptyJob() end
@@ -98,7 +90,6 @@ if server then
         return tonumber(c.money) or 0
     end
 
-    -- No reason field on this core, so it is accepted and dropped.
     function Core.AddMoney(src, account, amount, _)
         local c = char(src)
         if not c or (tonumber(amount) or 0) <= 0 then return false end

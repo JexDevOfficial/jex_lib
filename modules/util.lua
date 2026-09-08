@@ -39,8 +39,6 @@ function Util.Closest(from, list, within)
     return best, bestDist
 end
 
--- Waits for the framework to finish loading. Anything touching player
--- data at resource start needs this, or it races the core.
 function Jex.Wait(timeout)
     local deadline = GetGameTimer() + (timeout or 30000)
 
@@ -60,8 +58,6 @@ function Util.Trim(s)
     return (tostring(s or ''):gsub('^%s+', ''):gsub('%s+$', ''))
 end
 
--- Anything a player typed goes through this before it is stored or
--- shown to somebody else.
 function Util.Clean(s, maxLength)
     s = Util.Trim(s):gsub('[%c]', '')
     local max = maxLength or 255

@@ -1,6 +1,3 @@
--- One place in the world, described once. The blip, the ped, the marker
--- and the interaction all come from a single call, and the server owner
--- decides how the interaction looks.
 
 Jex.Point = {}
 local Point = Jex.Point
@@ -60,8 +57,6 @@ function Point.Register(opts)
         })
     end
 
-    -- Options mean it can be interacted with. How that looks is the
-    -- server owner's choice, not the script's.
     if opts.options and #opts.options > 0 then
         point.interactId = Jex.Interact.Register {
             id = opts.id,
@@ -116,7 +111,6 @@ function Point.RemoveAll()
     Jex.Interact.RemoveAll()
 end
 
--- One thread for every point a script owns. Sleeps when nothing is near.
 CreateThread(function()
     while true do
         local wait = 1000

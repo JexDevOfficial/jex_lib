@@ -1,4 +1,3 @@
--- Tables build themselves on first start. A buyer never imports SQL.
 
 Jex.DB = {}
 local DB = Jex.DB
@@ -30,8 +29,6 @@ function DB.Update(sql, params)
     return mysql():update_async(sql, params or {})
 end
 
--- Pass the CREATE TABLE statements a script needs. Additive only:
--- nothing here drops or destructively alters anything.
 function DB.Install(tables)
     CreateThread(function()
         local made = 0
@@ -56,8 +53,6 @@ function DB.Install(tables)
     end)
 end
 
--- Safe to call on every start. Adds a column if it is missing and does
--- nothing if it is already there.
 function DB.AddColumn(tableName, column, definition)
     local exists = DB.Scalar([[
         SELECT COUNT(*) FROM information_schema.columns

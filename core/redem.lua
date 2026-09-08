@@ -1,8 +1,3 @@
--- Written against redem_roleplay source. Not yet run on a live server.
---
--- RedEM does not expose its inventory the way the other two do - there
--- are no add/remove exports, only internal functions and events. Items
--- are the least certain part of this adapter and every call is wrapped.
 
 local Core = Jex.Core
 local RedEM = exports.redem_roleplay:RedEM()
@@ -101,8 +96,6 @@ if server then
         return out
     end
 
-    -- Cash and bank are separate calls here, not one function with an
-    -- account name.
     function Core.GetMoney(src, account)
         local p = player(src)
         if not p then return 0 end
@@ -184,8 +177,6 @@ if server then
         return Core.GetItemCount(src, item) >= (amount or 1)
     end
 
-    -- No weight check available without reaching inside the inventory,
-    -- so this is optimistic. The add will fail on its own if it cannot fit.
     function Core.CanCarry()
         return true
     end

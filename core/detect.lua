@@ -1,5 +1,3 @@
--- Works out what the server is built on. Nothing here is configurable
--- on the normal path: a buyer drags the resource in and it just knows.
 
 local CORES = {
     { resource = 'rsg-core',        name = 'rsg',   label = 'RSG Core' },
@@ -21,8 +19,6 @@ end
 
 local core = first_started(CORES)
 
--- An override exists for servers running a fork under a different name.
--- It is not the normal path and the docs do not lead with it.
 local forced = (Config and Config.Core) or (JexConfig and JexConfig.Core)
 
 if forced and forced ~= 'auto' then
@@ -39,8 +35,6 @@ else
         .. 'Fill in jex_lib/core/custom.lua if your core is not VORP, RSG or RedEM:RP.')
 end
 
--- Separate on purpose. Plenty of servers run one core with somebody
--- else's inventory.
 local inv = first_started(INVENTORIES)
 
 Jex.inventory = inv and inv.name or Jex.core

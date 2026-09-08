@@ -31,7 +31,6 @@ function Npc.Create(opts)
 
     Wait(0)
 
-    -- Without this they wander off, get shot, or react to the player.
     Citizen.InvokeNative(0x283978A15512B2FE, ped, true)
     SetEntityCanBeDamaged(ped, false)
     SetEntityInvincible(ped, true)
@@ -60,8 +59,6 @@ function Npc.CreateMany(list)
     return out
 end
 
--- Spawns when the player gets close and despawns when they leave, so a
--- server with a hundred of these only ever has the nearby ones loaded.
 function Npc.Register(opts)
     local entry = {
         opts = opts,
@@ -106,8 +103,6 @@ function Npc.RemoveAll()
     for _, entry in ipairs(registered) do entry.ped = nil end
 end
 
--- One thread for every registered ped. Idles at half a second when
--- nothing is close.
 CreateThread(function()
     while true do
         local wait = 1000

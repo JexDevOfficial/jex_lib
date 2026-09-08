@@ -1,6 +1,3 @@
--- Client asks the server a question and gets an answer back.
--- Events are namespaced per resource, so two Jex scripts running at once
--- never answer each other's calls.
 
 Jex.Callback = {}
 
@@ -14,7 +11,6 @@ local nextId = 0
 
 if IsDuplicityVersion() then
 
-    -- cb(source, ...) -> return values go back to the caller
     function Callback.Register(name, cb)
         handlers[name] = cb
     end
@@ -40,8 +36,6 @@ if IsDuplicityVersion() then
 
 else
 
-    -- Blocks until the server answers, or gives up. A dropped reply must
-    -- never leave a menu waiting forever.
     function Callback.Await(name, timeout, ...)
         nextId = nextId + 1
         local id = nextId

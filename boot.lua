@@ -1,7 +1,3 @@
--- jex_lib's own start. Detection normally runs inside whichever script
--- loads init.lua, which means nothing reports until one does. This runs
--- the same check on our own start so the console says what was found
--- before any script exists.
 
 local function detect()
     local cores = {
@@ -27,10 +23,6 @@ local function inventory()
     end
 end
 
--- Same thing from the server, for anything that wants to notify a
--- player without writing the event out:
---
---   exports.jex_lib:Notify(source, 'Payment received.', 'success')
 exports('Notify', function(src, text, kind, duration, title)
     if not src then return end
     TriggerClientEvent('jex:notify', src, text, kind, duration, title)
@@ -43,7 +35,6 @@ end)
 AddEventHandler('onResourceStart', function(resource)
     if resource ~= GetCurrentResourceName() then return end
 
-    -- Cores can start after us, so give them a moment before reporting.
     CreateThread(function()
         Wait(2000)
 
