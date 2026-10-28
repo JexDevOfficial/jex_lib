@@ -1,12 +1,11 @@
 {
     "jex_lib": {
-        "version": "1.0.0",
         "url": "https://github.com/JexDevOfficial/jex_lib"
     },
     "jex_interact": {
-        "version": "1.0.0",
         "url": "https://github.com/JexDevOfficial/jex_interact"
     },
+
     "jex_banking": {
         "version": "1.0.0",
         "url": "https://jex.dev"

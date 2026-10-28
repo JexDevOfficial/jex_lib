@@ -1,22 +1,26 @@
--- Version checker. Once the server is up, every jex_* resource is compared
--- against versions.json in the public jex_lib repo, and the result is printed
--- under one banner.
+-- Version checker. Once the server is up, every jex_* resource is checked for
+-- updates and the result is printed under one banner.
 --
--- versions.json lists every Jex script, free or paid, so a script's own code
--- never has to be on GitHub. Scripts listed there that this server doesn't
--- have are shown as not installed, with a link to get them.
+-- Free scripts have public repos, so their latest version is read straight
+-- from the fxmanifest.lua there. Paid scripts don't, so their latest version
+-- comes from versions.json in the public jex_lib repo. versions.json also
+-- lists the free scripts (with no version) so missing ones show as not
+-- installed.
 --
--- To release an update, bump the script's version in versions.json and push.
+-- Releasing a free script: publish it. Releasing a paid one: bump its version
+-- in versions.json and publish jex_lib.
 -- Turn it off with: set jex:versionCheck false
 
-local VERSIONS = 'https://raw.githubusercontent.com/JexDevOfficial/jex_lib/main/versions.json'
+local OWNER = 'JexDevOfficial'
+local BRANCH = 'main'
+local VERSIONS = ('https://raw.githubusercontent.com/%s/jex_lib/%s/versions.json'):format(OWNER, BRANCH)
 local PREFIX = 'jex_'
 local TIMEOUT = 10000
 
 local LINKS = {
     { 'DISCORD', '' },
     { 'WEBSITE', 'https://jex.dev' },
-    { 'GITHUB', 'https://github.com/JexDevOfficial' },
+    { 'GITHUB', 'https://github.com/' .. OWNER },
 }
 
 local FRAMEWORKS = {
@@ -49,6 +53,11 @@ local function compare(a, b)
         if p ~= q then return p < q and -1 or 1 end
     end
     return 0
+end
+
+local function manifest_version(body)
+    -- Line anchored, so fx_version never matches.
+    return ('\n' .. body):match("\n%s*version%s*%(?%s*['\"]([^'\"]+)['\"]")
 end
 
 local function framework()
@@ -137,54 +146,69 @@ local function report(results, reached)
             ok(('%s ^5%s^7 (dev build, latest is %s)'):format(name, r.have, r.latest))
         elseif r.status == 'outdated' then
             warn(('%s ^1%s^7 -> ^2%s^7%s'):format(name, r.have, r.latest, url))
-        elseif reached then
-            fail(('%s %s (not in the Jex version list)'):format(name, r.have))
         else
-            fail(('%s %s (not checked)'):format(name, r.have))
+            fail(('%s %s (could not check)'):format(name, r.have))
         end
     end
 
     print('')
 end
 
+local function await(pending)
+    local waited = 0
+    while pending() > 0 and waited < TIMEOUT do
+        Wait(250)
+        waited = waited + 250
+    end
+end
+
 local function check()
-    local latest, done = nil, false
+    local latest, pending = nil, 1
 
     PerformHttpRequest(VERSIONS, function(code, body)
         if code == 200 and body then
             local parsed, data = pcall(json.decode, body)
             if parsed and type(data) == 'table' then latest = data end
         end
-        done = true
+        pending = 0
     end, 'GET')
 
-    local waited = 0
-    while not done and waited < TIMEOUT do
-        Wait(250)
-        waited = waited + 250
-    end
+    await(function() return pending end)
 
     local results = {}
     for _, name in ipairs(resources(latest or {})) do
         local state = GetResourceState(name)
-        local entry = latest and latest[name]
+        local entry = latest and latest[name] or {}
         local r = {
             name = name,
             have = GetResourceMetadata(name, 'version', 0) or '0.0.0',
             running = state == 'started' or state == 'starting',
-            latest = entry and entry.version,
-            url = entry and entry.url,
+            latest = entry.version,
+            url = entry.url or ('https://github.com/%s/%s'):format(OWNER, name),
             status = 'unknown',
         }
+        results[#results + 1] = r
 
         if state == 'missing' or state == 'unknown' then
             r.status = 'missing'
-        elseif r.latest then
+        elseif not r.latest then
+            -- Free script: its public repo's fxmanifest is the latest version.
+            pending = pending + 1
+            local raw = ('https://raw.githubusercontent.com/%s/%s/%s/fxmanifest.lua'):format(OWNER, name, BRANCH)
+            PerformHttpRequest(raw, function(code, body)
+                r.latest = code == 200 and body and manifest_version(body) or nil
+                pending = pending - 1
+            end, 'GET')
+        end
+    end
+
+    await(function() return pending end)
+
+    for _, r in ipairs(results) do
+        if r.status ~= 'missing' and r.latest then
             local cmp = compare(r.have, r.latest)
             r.status = cmp < 0 and 'outdated' or cmp > 0 and 'newer' or 'current'
         end
-
-        results[#results + 1] = r
     end
 
     report(results, latest ~= nil)
