@@ -8,7 +8,7 @@ Detects your framework and gets out of the way.
 [![Release](https://img.shields.io/github/v/release/JexDevOfficial/jex_lib?style=flat-square&color=B7FF3C)](../../releases/latest)
 [![License](https://img.shields.io/badge/license-MIT-B7FF3C?style=flat-square)](LICENSE)
 
-[Download the latest release](../../releases/latest) · [jex.dev](https://jex.dev)
+[Download the latest release](../../releases/latest) · [jex-dev.com](https://jex-dev.com)
 
 </div>
 

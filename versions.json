@@ -8,18 +8,18 @@
 
     "jex_banking": {
         "version": "1.0.0",
-        "url": "https://jex.dev"
+        "url": "https://jex-dev.com/products.html"
     },
     "jex_deliveries": {
         "version": "1.0.0",
-        "url": "https://jex.dev"
+        "url": "https://jex-dev.com/products.html"
     },
     "jex_notifications": {
         "version": "1.0.0",
-        "url": "https://jex.dev"
+        "url": "https://jex-dev.com/products.html"
     },
     "jex_telegram": {
         "version": "1.0.0",
-        "url": "https://jex.dev"
+        "url": "https://jex-dev.com/products.html"
     }
 }

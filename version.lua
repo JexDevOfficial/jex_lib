@@ -19,7 +19,7 @@ local TIMEOUT = 10000
 
 local LINKS = {
     { 'DISCORD', '' },
-    { 'WEBSITE', 'https://jex.dev' },
+    { 'WEBSITE', 'https://jex-dev.com' },
     { 'GITHUB', 'https://github.com/' .. OWNER },
 }
 
