@@ -40,10 +40,8 @@ AddEventHandler('onResourceStart', function(resource)
 
         local core = detect()
         local inv = inventory()
-        local version = GetResourceMetadata(GetCurrentResourceName(), 'version', 0) or '?'
 
-        print(('^2[jex_lib]^7 v%s'):format(version))
-
+        -- Version is printed by version.lua with the rest of the Jex scripts.
         if core then
             print(('^2[jex_lib]^7 detected ^5%s^7 with ^5%s^7'):format(core, inv or 'its own inventory'))
         else

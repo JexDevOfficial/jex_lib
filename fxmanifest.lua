@@ -24,5 +24,8 @@ files {
     'nui/app.js',
 }
 
-server_script 'boot.lua'
+server_scripts {
+    'boot.lua',
+    'version.lua',
+}
 client_script 'client.lua'
