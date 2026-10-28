@@ -17,26 +17,45 @@ local VERSIONS = ('https://raw.githubusercontent.com/%s/jex_lib/%s/versions.json
 local PREFIX = 'jex_'
 local TIMEOUT = 10000
 
+local TAGLINE = 'Systems for better worlds.'
+
+-- Shown in the footer, in this order. Empty ones are skipped.
 local LINKS = {
-    { 'DISCORD', '' },
-    { 'WEBSITE', 'https://jex-dev.com' },
-    { 'GITHUB', 'https://github.com/' .. OWNER },
+    'jex-dev.com',
+    'github.com/' .. OWNER,
+    '', -- discord invite
 }
 
 local FRAMEWORKS = {
+    { 'rsg-core', 'RSG Core' },
     { 'vorp_core', 'VORP' },
-    { 'rsg-core', 'RSG' },
     { 'redem_roleplay', 'RedEM:RP' },
     { 'qbr-core', 'QBR' },
 }
 
-local LOGO = {
-    '     ██╗███████╗██╗  ██╗',
-    '     ██║██╔════╝╚██╗██╔╝',
-    '     ██║█████╗   ╚███╔╝ ',
-    '██   ██║██╔══╝   ██╔██╗ ',
-    '╚█████╔╝███████╗██╔╝ ██╗',
-    ' ╚════╝ ╚══════╝╚═╝  ╚═╝',
+local INVENTORIES = { 'rsg-inventory', 'vorp_inventory', 'redemrp_inventory', 'ox_inventory' }
+
+-- The jex-dev.com palette, as 24-bit console colour.
+local function rgb(r, g, b) return ('\27[38;2;%d;%d;%dm'):format(r, g, b) end
+
+local C = {
+    lime = rgb(183, 255, 60),
+    text = rgb(232, 229, 222),
+    muted = rgb(133, 135, 138),
+    faint = rgb(92, 95, 99),
+    amber = rgb(255, 196, 61),
+    red = rgb(255, 99, 88),
+    reset = '\27[0m',
+}
+
+-- JEX.DEV, three rows tall. Each glyph is the same width on every row.
+local GLYPHS = {
+    J = { ' ╻', ' ┃', '┗┛' },
+    E = { '┏━╸', '┣╸ ', '┗━╸' },
+    X = { '╻ ╻', '┏╋┛', '╹ ╹' },
+    ['.'] = { ' ', ' ', '╹' },
+    D = { '╺┳┓', ' ┃┃', '╺┻┛' },
+    V = { '╻ ╻', '┃┏┛', '┗┛ ' },
 }
 
 local function parts(v)
@@ -60,12 +79,20 @@ local function manifest_version(body)
     return ('\n' .. body):match("\n%s*version%s*%(?%s*['\"]([^'\"]+)['\"]")
 end
 
+local function running(name)
+    local state = GetResourceState(name)
+    return state == 'started' or state == 'starting'
+end
+
 local function framework()
+    local core = 'Standalone'
     for _, f in ipairs(FRAMEWORKS) do
-        local state = GetResourceState(f[1])
-        if state == 'started' or state == 'starting' then return f[2] end
+        if running(f[1]) then core = f[2] break end
     end
-    return 'STANDALONE'
+    for _, inv in ipairs(INVENTORIES) do
+        if running(inv) then return core .. C.faint .. '  ·  ' .. C.text .. inv end
+    end
+    return core
 end
 
 -- Everything in versions.json, plus any other jex_* resource on this server.
@@ -92,65 +119,82 @@ local function resources(latest)
     return list
 end
 
-local function banner()
-    local dots = '^1▪ ▪ ▪ ▪ ▪ ▪'
-    print('')
-    print(('        %s  ^7VERSIONS CHECKER  %s^7'):format(dots, dots))
-    print('')
-    for _, line in ipairs(LOGO) do
-        -- Solid blocks in yellow, the box-drawing shadow in red.
-        print('        ^1' .. line:gsub('(█+)', '^3%1^1') .. '^7')
-    end
-    print('')
-    for _, link in ipairs(LINKS) do
-        if link[2] ~= '' then
-            print(('        ^5%-9s^3%s^7'):format(link[1] .. ':', link[2]))
-        end
-    end
-    print('')
-    print(('        %s ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪^7'):format(dots))
-    print('')
+-- Every line sits against a lime rule, like the accent bar on the site.
+local function line(text)
+    print(C.lime .. '  ▌ ' .. C.reset .. (text or '') .. C.reset)
 end
 
-local function ok(msg) print('^2✓ ^7' .. msg) end
-local function warn(msg) print('^3! ^7' .. msg) end
-local function fail(msg) print('^1✗ ^7' .. msg) end
+local function wordmark()
+    for row = 1, 3 do
+        local jex, dev = {}, {}
+        for ch in ('JEX'):gmatch('.') do jex[#jex + 1] = GLYPHS[ch][row] end
+        for ch in ('.DEV'):gmatch('.') do dev[#dev + 1] = GLYPHS[ch][row] end
+        line(' ' .. C.text .. table.concat(jex, ' ') .. ' ' .. C.lime .. table.concat(dev, ' '))
+    end
+end
+
+local function rule(label)
+    line(C.lime .. label .. ' ' .. C.faint .. ('─'):rep(44 - #label))
+end
+
+local ROW = '%s %s%-20s %s%-9s %s'
+
+local function row(r)
+    local name = r.name
+    local stopped = r.running and '' or (C.faint .. ' (stopped)')
+
+    if r.status == 'current' then
+        line(ROW:format(C.lime .. '●', C.text, name, C.muted, r.have, C.faint .. 'up to date' .. stopped))
+    elseif r.status == 'newer' then
+        line(ROW:format(C.lime .. '●', C.text, name, C.muted, r.have,
+            C.faint .. 'dev build, latest is ' .. r.latest .. stopped))
+    elseif r.status == 'outdated' then
+        line(ROW:format(C.amber .. '▲', C.text, name, C.red, r.have,
+            C.lime .. '→ ' .. r.latest .. '  ' .. C.amber .. 'update' .. stopped))
+        line(('  %s%s'):format(C.faint, r.url))
+    elseif r.status == 'missing' then
+        line(ROW:format(C.faint .. '○', C.faint, name, C.faint, '', 'not installed  ' .. r.url))
+    else
+        line(ROW:format(C.red .. '×', C.text, name, C.muted, r.have, C.red .. 'could not check' .. stopped))
+    end
+end
 
 local function report(results, reached)
-    banner()
-
-    local outdated = 0
+    local outdated, installed = 0, 0
     for _, r in ipairs(results) do
         if r.status == 'outdated' then outdated = outdated + 1 end
+        if r.status ~= 'missing' then installed = installed + 1 end
     end
 
+    local summary
     if not reached then
-        fail('^1COULD NOT REACH THE JEX VERSION LIST.^7')
+        summary = C.red .. 'Could not reach the Jex version list.'
     elseif outdated > 0 then
-        warn(('^3%d JEX RESOURCE%s NEED%s UPDATING.^7'):format(
-            outdated, outdated == 1 and '' or 'S', outdated == 1 and 'S' or ''))
+        summary = C.amber .. ('%d update%s available.'):format(outdated, outdated == 1 and '' or 's')
     else
-        ok('^2ALL INSTALLED JEX RESOURCES ARE UP TO DATE.^7')
+        summary = C.lime .. ('All %d installed Jex scripts are up to date.'):format(installed)
     end
 
-    ok('FRAMEWORK IN USE: ^3' .. framework() .. '^7')
-
-    for _, r in ipairs(results) do
-        local name = r.running and r.name or (r.name .. ' ^8(stopped)^7')
-        local url = r.url and ('  ' .. r.url) or ''
-        if r.status == 'missing' then
-            print(('^8- %s not installed%s^7'):format(r.name, url))
-        elseif r.status == 'current' then
-            ok(('%s ^2%s^7'):format(name, r.have))
-        elseif r.status == 'newer' then
-            ok(('%s ^5%s^7 (dev build, latest is %s)'):format(name, r.have, r.latest))
-        elseif r.status == 'outdated' then
-            warn(('%s ^1%s^7 -> ^2%s^7%s'):format(name, r.have, r.latest, url))
-        else
-            fail(('%s %s (could not check)'):format(name, r.have))
-        end
+    local links = {}
+    for _, link in ipairs(LINKS) do
+        if link ~= '' then links[#links + 1] = link end
     end
 
+    print('')
+    line()
+    wordmark()
+    line(' ' .. C.muted .. TAGLINE)
+    line()
+    rule('SCRIPTS')
+    for _, r in ipairs(results) do row(r) end
+    line()
+    line(summary)
+    line()
+    rule('SERVER')
+    line(('%s%-10s %s%s'):format(C.muted, 'Framework', C.text, framework()))
+    line(('%s%-10s %s%s'):format(C.muted, 'Links', C.text,
+        table.concat(links, C.faint .. '  ·  ' .. C.text)))
+    line()
     print('')
 end
 
@@ -182,7 +226,7 @@ local function check()
         local r = {
             name = name,
             have = GetResourceMetadata(name, 'version', 0) or '0.0.0',
-            running = state == 'started' or state == 'starting',
+            running = running(name),
             latest = entry.version,
             url = entry.url or ('https://github.com/%s/%s'):format(OWNER, name),
             status = 'unknown',

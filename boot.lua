@@ -11,18 +11,6 @@ local function detect()
     end
 end
 
-local function inventory()
-    local invs = {
-        { 'rsg-inventory', 'rsg-inventory' },
-        { 'vorp_inventory', 'vorp_inventory' },
-        { 'redemrp_inventory', 'redemrp_inventory' },
-    }
-
-    for _, entry in ipairs(invs) do
-        if GetResourceState(entry[1]) == 'started' then return entry[2] end
-    end
-end
-
 exports('Notify', function(src, text, kind, duration, title)
     if not src then return end
     TriggerClientEvent('jex:notify', src, text, kind, duration, title)
@@ -38,13 +26,8 @@ AddEventHandler('onResourceStart', function(resource)
     CreateThread(function()
         Wait(2000)
 
-        local core = detect()
-        local inv = inventory()
-
-        -- Version is printed by version.lua with the rest of the Jex scripts.
-        if core then
-            print(('^2[jex_lib]^7 detected ^5%s^7 with ^5%s^7'):format(core, inv or 'its own inventory'))
-        else
+        -- Version, framework and inventory are printed by version.lua.
+        if not detect() then
             print('^3[jex_lib]^7 no supported framework found. Scripts will use the custom bridge -'
                 .. ' fill in jex_lib/core/custom.lua if you are not on VORP, RSG or RedEM:RP.')
         end
