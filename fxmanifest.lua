@@ -5,7 +5,7 @@ rdr3_warning 'I acknowledge that this is a prerelease build of RedM, and I am aw
 name 'jex_lib'
 author 'jex.dev'
 description 'Shared library for Jex scripts. Detects your framework on start.'
-version '1.0.0'
+version '1.1.0'
 repository 'https://github.com/JexDevOfficial/jex_lib'
 
 lua54 'yes'
